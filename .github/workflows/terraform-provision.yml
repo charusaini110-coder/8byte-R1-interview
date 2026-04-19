@@ -1,0 +1,263 @@
+name: Terraform Provision Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to perform'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+      resource_target:
+        description: 'Resource/Module to deploy (select "all" for entire infrastructure)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - vpc
+          - security_groups
+          - alb
+          - ec2
+          - rds
+
+env:
+  TERRAFORM_VERSION: 1.5.0
+  AWS_REGION: ap-south-1
+
+jobs:
+  terraform-validate:
+    name: Terraform Validate & Plan
+    runs-on: [self-hosted, terraform]
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    outputs:
+      terraform_targets: ${{ steps.set-targets.outputs.targets }}
+      targets_display: ${{ steps.set-targets.outputs.display }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine Terraform Targets
+        id: set-targets
+        run: |
+          RESOURCE_TARGET="${{ github.event.inputs.resource_target }}"
+          
+          if [ "$RESOURCE_TARGET" = "all" ]; then
+            TARGETS=""
+            DISPLAY="All infrastructure (VPC, Security Groups, ALB, EC2, RDS)"
+          elif [ "$RESOURCE_TARGET" = "vpc" ]; then
+            TARGETS="-target=module.vpc"
+            DISPLAY="VPC Module"
+          elif [ "$RESOURCE_TARGET" = "security_groups" ]; then
+            TARGETS="-target=module.security_groups"
+            DISPLAY="Security Groups Module"
+          elif [ "$RESOURCE_TARGET" = "alb" ]; then
+            TARGETS="-target=module.alb"
+            DISPLAY="Application Load Balancer (ALB) Module"
+          elif [ "$RESOURCE_TARGET" = "ec2" ]; then
+            TARGETS="-target=module.ec2"
+            DISPLAY="EC2 Instances Module"
+          elif [ "$RESOURCE_TARGET" = "rds" ]; then
+            TARGETS="-target=module.rds"
+            DISPLAY="RDS Database Module"
+          else
+            TARGETS=""
+            DISPLAY="All infrastructure"
+          fi
+          
+          echo "targets=$TARGETS" >> $GITHUB_OUTPUT
+          echo "display=$DISPLAY" >> $GITHUB_OUTPUT
+          echo "📋 Resource Target: $DISPLAY"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="bucket=8byte-tf-state-${{ secrets.AWS_ACCOUNT_ID }}" \
+            -backend-config="dynamodb_table=8byte-tf-lock" \
+            -backend-config="key=terraform/state.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            ${{ steps.set-targets.outputs.targets }} \
+            -var="db_username=${{ secrets.DB_USERNAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -out=tfplan
+        continue-on-error: true
+
+      - name: Display Deployment Scope
+        run: |
+          echo "## 📦 Deployment Scope" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Resource:** ${{ steps.set-targets.outputs.display }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Terraform Version:** ${{ env.TERRAFORM_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**AWS Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload tfplan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/tfplan
+          retention-days: 1
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: [self-hosted, terraform]
+    needs: terraform-validate
+    if: github.event.inputs.action == 'apply'
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=8byte-tf-state-${{ secrets.AWS_ACCOUNT_ID }}" \
+            -backend-config="dynamodb_table=8byte-tf-lock" \
+            -backend-config="key=terraform/state.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="encrypt=true"
+
+      - name: Download tfplan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          terraform apply \
+            ${{ needs.terraform-validate.outputs.terraform_targets }} \
+            -var="db_username=${{ secrets.DB_USERNAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -auto-approve \
+            tfplan
+
+      - name: Capture Terraform Outputs
+        id: outputs
+        run: |
+          terraform output -json > outputs.json
+          echo "outputs=$(cat outputs.json)" >> $GITHUB_OUTPUT
+
+      - name: Apply Summary
+        run: |
+          echo "## ✅ Terraform Apply Completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Resource:** ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Outputs:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          cat outputs.json >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  terraform-destroy:
+    name: Terraform Destroy
+    runs-on: [self-hosted, terraform]
+    needs: terraform-validate
+    if: github.event.inputs.action == 'destroy'
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: ./terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: |
+          terraform init \
+            -backend-config="bucket=8byte-tf-state-${{ secrets.AWS_ACCOUNT_ID }}" \
+            -backend-config="dynamodb_table=8byte-tf-lock" \
+            -backend-config="key=terraform/state.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Destroy
+        id: destroy
+        run: |
+          terraform destroy \
+            ${{ needs.terraform-validate.outputs.terraform_targets }} \
+            -var="db_username=${{ secrets.DB_USERNAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -auto-approve
+
+      - name: Destroy Summary
+        run: |
+          echo "## ⚠️ Terraform Destroy Completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Resource:** ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Resources have been destroyed" >> $GITHUB_STEP_SUMMARY
