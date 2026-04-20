@@ -48,6 +48,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify Working Directory
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo ""
+          echo "Repository contents:"
+          ls -la
+          echo ""
+          if [ -d "terraform" ]; then
+            echo "✓ terraform directory found"
+          else
+            echo "✗ terraform directory NOT found - this will cause issues!"
+          fi
+
       - name: Debug - Check Environment and Secrets
         run: |
           echo "GitHub Environment: 8byte-R1"
@@ -154,6 +168,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify Working Directory
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo "Repository contents:"
+          ls -la
+          if [ -d "terraform" ]; then
+            echo "✓ terraform directory found"
+          fi
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -222,6 +246,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify Working Directory
+        run: |
+          echo "Current working directory:"
+          pwd
+          echo "Repository contents:"
+          ls -la
+          if [ -d "terraform" ]; then
+            echo "✓ terraform directory found"
+          fi
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
