@@ -141,13 +141,6 @@ jobs:
           echo "*Terraform Version:* ${{ env.TERRAFORM_VERSION }}" >> $GITHUB_STEP_SUMMARY
           echo "*AWS Region:* ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload tfplan artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: tfplan
-          retention-days: 1
-
   terraform-apply:
     name: Terraform Apply
     runs-on: [self-hosted]
@@ -180,20 +173,19 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init
 
-      - name: Download tfplan artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan
-          path: .
+      - name: Terraform Plan
+        run: |
+          terraform plan \
+            ${{ needs.terraform-validate.outputs.terraform_targets }}
 
       - name: Terraform Apply
         run: |
           terraform apply \
             ${{ needs.terraform-validate.outputs.terraform_targets }} \
-            -auto-approve \
-            tfplan
+            -auto-approve
 
       - name: Capture Terraform Outputs
         id: outputs
