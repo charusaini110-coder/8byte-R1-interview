@@ -21,13 +21,12 @@ on:
           - all
           - vpc
           - security_groups
-          - alb
           - ec2
           - rds
 
 env:
   TERRAFORM_VERSION: 1.5.0
-  AWS_REGION: ap-south-1
+  AWS_REGION: us-east-1
 
 jobs:
   terraform-validate:
@@ -55,16 +54,13 @@ jobs:
           
           if [ "$RESOURCE_TARGET" = "all" ]; then
             TARGETS=""
-            DISPLAY="All infrastructure (VPC, Security Groups, ALB, EC2, RDS)"
+            DISPLAY="All infrastructure (VPC, Security Groups, EC2, RDS)"
           elif [ "$RESOURCE_TARGET" = "vpc" ]; then
             TARGETS="-target=module.vpc"
             DISPLAY="VPC Module"
           elif [ "$RESOURCE_TARGET" = "security_groups" ]; then
             TARGETS="-target=module.security_groups"
             DISPLAY="Security Groups Module"
-          elif [ "$RESOURCE_TARGET" = "alb" ]; then
-            TARGETS="-target=module.alb"
-            DISPLAY="Application Load Balancer (ALB) Module"
           elif [ "$RESOURCE_TARGET" = "ec2" ]; then
             TARGETS="-target=module.ec2"
             DISPLAY="EC2 Instances Module"

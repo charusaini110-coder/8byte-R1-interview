@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "feature_terraform_intergration" ]
   pull_request:
     branches: [ "main" ]
 
