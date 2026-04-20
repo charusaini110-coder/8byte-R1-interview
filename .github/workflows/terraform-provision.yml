@@ -1,5 +1,7 @@
 name: Terraform Provision Infrastructure
-
+defaults:
+ run:
+  working-directory: terraform
 on:
   workflow_dispatch:
     inputs:
@@ -32,8 +34,6 @@ jobs:
   terraform-validate:
     name: Terraform Validate & Plan
     runs-on: [self-hosted]
-    run: 
-     working-directory: terraform
     environment: 8byte-R1
     permissions:
       contents: read
