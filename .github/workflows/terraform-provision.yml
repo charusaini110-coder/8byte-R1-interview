@@ -27,9 +27,6 @@ on:
 env:
   TERRAFORM_VERSION: 1.5.0
   AWS_REGION: us-east-1
-  aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
 
 jobs:
   terraform-validate:
@@ -54,9 +51,8 @@ jobs:
       - name: Debug - Check Environment and Secrets
         run: |
           echo "GitHub Environment: 8byte-R1"
-          echo "Job Environment: 8byte-R1"
-          echo "AWS_ACCESS_KEY_ID available: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}"
-          echo "AWS_ACCOUNT_ID available: ${{ secrets.AWS_ACCOUNT_ID != '' }}"
+          echo "AWS_ACCESS_KEY_ID available: ${{ vars.AWS_ACCESS_KEY_ID != '' }}"
+          echo "AWS_ACCOUNT_ID available: ${{ vars.AWS_ACCOUNT_ID != '' }}"
           echo "DB_USERNAME available: ${{ secrets.DB_USERNAME != '' }}"
           echo "DB_PASSWORD available: ${{ secrets.DB_PASSWORD != '' }}"
 
@@ -97,7 +93,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
@@ -110,7 +106,7 @@ jobs:
         id: init
         run: |
           terraform init \
-            -backend-config="bucket=8byte-tf-state-${{ secrets.AWS_ACCOUNT_ID }}" \
+            -backend-config="bucket=8byte-tf-state-${{ vars.AWS_ACCOUNT_ID }}" \
             -backend-config="dynamodb_table=8byte-tf-lock" \
             -backend-config="key=terraform/state.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
@@ -132,11 +128,11 @@ jobs:
         run: |
           echo "## 📦 Deployment Scope" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Action:** ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Target Resource:** ${{ steps.set-targets.outputs.display }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Action:* ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Target Resource:* ${{ steps.set-targets.outputs.display }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Terraform Version:** ${{ env.TERRAFORM_VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "**AWS Region:** ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Terraform Version:* ${{ env.TERRAFORM_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "*AWS Region:* ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload tfplan artifact
         uses: actions/upload-artifact@v4
@@ -170,14 +166,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=8byte-tf-state-${{ env.AWS_ACCOUNT_ID }}" \
+            -backend-config="bucket=8byte-tf-state-${{ vars.AWS_ACCOUNT_ID }}" \
             -backend-config="dynamodb_table=8byte-tf-lock" \
             -backend-config="key=terraform/state.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
@@ -207,12 +203,12 @@ jobs:
         run: |
           echo "## ✅ Terraform Apply Completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Target Resource:** ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Target Resource:* ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Outputs:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          echo "*Outputs:*" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
           cat outputs.json >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   terraform-destroy:
     name: Terraform Destroy
@@ -239,14 +235,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ vars.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=8byte-tf-state-${{ env.AWS_ACCOUNT_ID }}" \
+            -backend-config="bucket=8byte-tf-state-${{ vars.AWS_ACCOUNT_ID }}" \
             -backend-config="dynamodb_table=8byte-tf-lock" \
             -backend-config="key=terraform/state.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
@@ -263,6 +259,6 @@ jobs:
         run: |
           echo "## ⚠️ Terraform Destroy Completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Target Resource:** ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
+          echo "*Target Resource:* ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** Resources have been destroyed" >> $GITHUB_STEP_SUMMARY
+          echo "*Status:* Resources have been destroyed" >> $GITHUB_STEP_SUMMARY
