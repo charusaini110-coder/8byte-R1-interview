@@ -47,6 +47,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Use node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Verify Working Directory
         run: |
           echo "Current working directory:"
