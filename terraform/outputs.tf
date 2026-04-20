@@ -42,29 +42,30 @@ output "db_sg_id" {
 # =====================================
 # Load Balancer Outputs (for_each)
 # =====================================
-output "alb_dns_names" {
-  description = "DNS names of all load balancers"
-  value = {
-    for key, alb in module.alb :
-    key => alb.alb_dns_name
-  }
-}
-
-output "alb_arns" {
-  description = "ARNs of all load balancers"
-  value = {
-    for key, alb in module.alb :
-    key => alb.alb_arn
-  }
-}
-
-output "target_group_arns" {
-  description = "ARNs of all target groups"
-  value = {
-    for key, alb in module.alb :
-    key => alb.target_group_arn
-  }
-}
+# COMMENTED OUT - ALB not currently deployed
+# output "alb_dns_names" {
+#   description = "DNS names of all load balancers"
+#   value = {
+#     for key, alb in module.alb :
+#     key => alb.alb_dns_name
+#   }
+# }
+#
+# output "alb_arns" {
+#   description = "ARNs of all load balancers"
+#   value = {
+#     for key, alb in module.alb :
+#     key => alb.alb_arn
+#   }
+# }
+#
+# output "target_group_arns" {
+#   description = "ARNs of all target groups"
+#   value = {
+#     for key, alb in module.alb :
+#     key => alb.target_group_arn
+#   }
+# }
 
 # =====================================
 # EC2 Outputs (for_each)
@@ -143,10 +144,10 @@ output "deployment_summary" {
   description = "Summary of deployed resources"
   value = {
     vpc_id           = module.vpc.vpc_id
-    alb_count        = length(module.alb)
+    # alb_count        = length(module.alb) # COMMENTED OUT - ALB disabled
     ec2_count        = length(module.ec2)
     rds_count        = length(module.rds)
-    primary_alb_dns  = try(module.alb[keys(var.alb_config)[0]].alb_dns_name, "N/A")
+    # primary_alb_dns  = try(module.alb[keys(var.alb_config)[0]].alb_dns_name, "N/A") # COMMENTED OUT - ALB disabled
     primary_rds_host = try(module.rds[keys(var.rds_databases)[0]].db_address, "N/A")
   }
 }

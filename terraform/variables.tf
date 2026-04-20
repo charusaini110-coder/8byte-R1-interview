@@ -31,19 +31,20 @@ variable "security_groups_enabled" {
 }
 
 # ALB Configuration
-variable "alb_config" {
-  description = "Application Load Balancer configuration"
-  type = map(object({
-    enabled = bool
-    name    = string
-  }))
-  default = {
-    primary = {
-      enabled = true
-      name    = "primary"
-    }
-  }
-}
+# COMMENTED OUT - ALB not currently deployed
+# variable "alb_config" {
+#   description = "Application Load Balancer configuration"
+#   type = map(object({
+#     enabled = bool
+#     name    = string
+#   }))
+#   default = {
+#     primary = {
+#       enabled = true
+#       name    = "primary"
+#     }
+#   }
+# }
 
 # EC2 Configuration
 variable "ec2_instances" {

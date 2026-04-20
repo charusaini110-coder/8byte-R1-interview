@@ -1,5 +1,5 @@
 resource "aws_db_instance" "postgres" {
-  identifier             = "8byte-db-${var.environment}"
+  identifier             = "byte8-db-${var.environment}"
   engine                 = "postgres"
   engine_version         = var.engine_version
   instance_class         = var.instance_class

@@ -1,10 +1,10 @@
 # AWS Configuration
-aws_region = "ap-south-1"
+aws_region = "us-east-1"
 environment = "staging"
 
 # VPC Configuration
 vpc_config = {
-  cidr               = "10.0.0.0/16"
+  cidr               = "10.0.0.0/28"
   enable_nat_gateway = false
 }
 
@@ -12,17 +12,17 @@ vpc_config = {
 security_groups_enabled = true
 
 # ALB Configuration (for_each)
-# Add/remove ALBs by adding/removing entries
-alb_config = {
-  primary = {
-    enabled = true
-    name    = "primary"
-  }
-  # secondary = {
-  #   enabled = true
-  #   name    = "secondary"
-  # }
-}
+# COMMENTED OUT - ALB not currently deployed
+# alb_config = {
+#   primary = {
+#     enabled = true
+#     name    = "primary"
+#   }
+#   # secondary = {
+#   #   enabled = true
+#   #   name    = "secondary"
+#   # }
+# }
 
 # EC2 Instances Configuration (for_each)
 # Add/remove instances by adding/removing entries
@@ -63,8 +63,7 @@ rds_databases = {
 }
 
 # Database Credentials
-# NOTE: Set these via environment variables or -var flags for security
-# db_username = "admin"
-# db_password = "your-secure-password"
+db_username = "admin"
+db_password = "SecurePassword123!"
 
 

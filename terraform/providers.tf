@@ -11,13 +11,13 @@ terraform {
   # Remote state management via S3 and DynamoDB for locking
   # Note: Backend configuration uses static values (no interpolation)
   # Update the bucket name with your AWS account ID after running backend-setup
-  backend "s3" {
+ /* backend "s3" {
     bucket         = "8byte-tf-state-123456789012"  # Replace with your account ID
     key            = "terraform/state.tfstate"
-    region         = "ap-south-1"
-    dynamodb_table = "8byte-tf-lock"
+    region         = "us-east-1"
+    //dynamodb_table = "8byte-tf-lock"
     encrypt        = true
-  }
+  }*/
 }
 
 provider "aws" {
