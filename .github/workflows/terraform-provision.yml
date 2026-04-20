@@ -32,6 +32,7 @@ jobs:
   terraform-validate:
     name: Terraform Validate & Plan
     runs-on: [self-hosted]
+    environment: 8byte-R1
     permissions:
       contents: read
       id-token: write
@@ -46,6 +47,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Debug - Check Environment and Secrets
+        run: |
+          echo "GitHub Environment: 8byte-R1"
+          echo "Job Environment: 8byte-R1"
+          echo "AWS_ACCESS_KEY_ID available: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}"
+          echo "AWS_ACCOUNT_ID available: ${{ secrets.AWS_ACCOUNT_ID != '' }}"
+          echo "DB_USERNAME available: ${{ secrets.DB_USERNAME != '' }}"
+          echo "DB_PASSWORD available: ${{ secrets.DB_PASSWORD != '' }}"
 
       - name: Determine Terraform Targets
         id: set-targets
@@ -84,7 +94,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
@@ -112,8 +122,6 @@ jobs:
         run: |
           terraform plan \
             ${{ steps.set-targets.outputs.targets }} \
-            -var="db_username=${{ secrets.DB_USERNAME }}" \
-            -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -out=tfplan
         continue-on-error: true
 
@@ -137,6 +145,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     runs-on: [self-hosted]
+    environment: 8byte-R1
     needs: terraform-validate
     if: github.event.inputs.action == 'apply'
     permissions:
@@ -158,14 +167,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=8byte-tf-state-${{ secrets.AWS_ACCOUNT_ID }}" \
+            -backend-config="bucket=8byte-tf-state-${{ env.AWS_ACCOUNT_ID }}" \
             -backend-config="dynamodb_table=8byte-tf-lock" \
             -backend-config="key=terraform/state.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
@@ -182,8 +191,6 @@ jobs:
         run: |
           terraform apply \
             ${{ needs.terraform-validate.outputs.terraform_targets }} \
-            -var="db_username=${{ secrets.DB_USERNAME }}" \
-            -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -auto-approve \
             tfplan
 
@@ -206,6 +213,7 @@ jobs:
 
   terraform-destroy:
     name: Terraform Destroy
+    environment: 8byte-R1
     runs-on: [self-hosted]
     needs: terraform-validate
     if: github.event.inputs.action == 'destroy'
@@ -228,14 +236,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Init
         run: |
           terraform init \
-            -backend-config="bucket=8byte-tf-state-${{ secrets.AWS_ACCOUNT_ID }}" \
+            -backend-config="bucket=8byte-tf-state-${{ env.AWS_ACCOUNT_ID }}" \
             -backend-config="dynamodb_table=8byte-tf-lock" \
             -backend-config="key=terraform/state.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
@@ -246,8 +254,6 @@ jobs:
         run: |
           terraform destroy \
             ${{ needs.terraform-validate.outputs.terraform_targets }} \
-            -var="db_username=${{ secrets.DB_USERNAME }}" \
-            -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -auto-approve
 
       - name: Destroy Summary
