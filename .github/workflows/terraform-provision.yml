@@ -32,6 +32,7 @@ jobs:
   terraform-validate:
     name: Terraform Validate & Plan
     runs-on: [self-hosted]
+    environment: 8byte-R1
     permissions:
       contents: read
       id-token: write
@@ -137,6 +138,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     runs-on: [self-hosted]
+    environment: 8byte-R1
     needs: terraform-validate
     if: github.event.inputs.action == 'apply'
     permissions:
@@ -206,6 +208,7 @@ jobs:
 
   terraform-destroy:
     name: Terraform Destroy
+    environment: 8byte-R1
     runs-on: [self-hosted]
     needs: terraform-validate
     if: github.event.inputs.action == 'destroy'
