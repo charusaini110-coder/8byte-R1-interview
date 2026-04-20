@@ -105,6 +105,7 @@ jobs:
       - name: Terraform Init
         id: init
         run: |
+          cd terraform
           terraform init
 
       - name: Terraform Validate
