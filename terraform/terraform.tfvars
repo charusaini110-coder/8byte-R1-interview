@@ -4,7 +4,7 @@ environment = "staging"
 
 # VPC Configuration
 vpc_config = {
-  cidr               = "10.0.0.0/24"
+  cidr               = "10.0.0.0/22"
   enable_nat_gateway = false
 }
 
