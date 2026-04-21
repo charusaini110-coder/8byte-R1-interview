@@ -24,10 +24,3 @@ resource "aws_instance" "app_server" {
     var.tags
   )
 }
-
-# COMMENTED OUT - ALB not currently deployed
-# resource "aws_lb_target_group_attachment" "app_attachment" {
-#   target_group_arn = var.target_group_arn
-#   target_id        = aws_instance.app_server.id
-#   port             = 80
-# }

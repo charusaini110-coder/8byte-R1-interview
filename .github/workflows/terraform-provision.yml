@@ -96,7 +96,7 @@ jobs:
           
           echo "targets=$TARGETS" >> $GITHUB_OUTPUT
           echo "display=$DISPLAY" >> $GITHUB_OUTPUT
-          echo "📋 Resource Target: $DISPLAY"
+          echo "Resource Target: $DISPLAY"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -133,7 +133,7 @@ jobs:
 
       - name: Display Deployment Scope
         run: |
-          echo "## 📦 Deployment Scope" >> $GITHUB_STEP_SUMMARY
+          echo "## Deployment Scope" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*Action:* ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
           echo "*Target Resource:* ${{ steps.set-targets.outputs.display }}" >> $GITHUB_STEP_SUMMARY
@@ -197,7 +197,7 @@ jobs:
 
       - name: Apply Summary
         run: |
-          echo "## ✅ Terraform Apply Completed" >> $GITHUB_STEP_SUMMARY
+          echo "## Terraform Apply Completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*Target Resource:* ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -249,7 +249,7 @@ jobs:
 
       - name: Destroy Summary
         run: |
-          echo "## ⚠️ Terraform Destroy Completed" >> $GITHUB_STEP_SUMMARY
+          echo "## Terraform Destroy Completed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*Target Resource:* ${{ needs.terraform-validate.outputs.targets_display }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

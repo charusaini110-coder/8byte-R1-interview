@@ -1,6 +1,4 @@
-# =====================================
 # VPC Outputs
-# =====================================
 output "vpc_id" {
   description = "The ID of the VPC"
   value       = module.vpc.vpc_id
@@ -16,9 +14,7 @@ output "public_subnets" {
   value       = module.vpc.public_subnets
 }
 
-# =====================================
 # Security Groups Outputs
-# =====================================
 output "alb_sg_id" {
   description = "Security group ID for ALB"
   value       = try(module.security_groups[0].alb_sg_id, null)
@@ -34,37 +30,32 @@ output "db_sg_id" {
   value       = try(module.security_groups[0].db_sg_id, null)
 }
 
-# =====================================
 # Load Balancer Outputs (for_each)
-# =====================================
-# COMMENTED OUT - ALB not currently deployed
-# output "alb_dns_names" {
-#   description = "DNS names of all load balancers"
-#   value = {
-#     for key, alb in module.alb :
-#     key => alb.alb_dns_name
-#   }
-# }
-#
-# output "alb_arns" {
-#   description = "ARNs of all load balancers"
-#   value = {
-#     for key, alb in module.alb :
-#     key => alb.alb_arn
-#   }
-# }
-#
-# output "target_group_arns" {
-#   description = "ARNs of all target groups"
-#   value = {
-#     for key, alb in module.alb :
-#     key => alb.target_group_arn
-#   }
-# }
+output "alb_dns_names" {
+  description = "DNS names of all load balancers"
+  value = {
+    for key, alb in module.alb :
+    key => alb.alb_dns_name
+  }
+}
 
-# =====================================
+output "alb_arns" {
+  description = "ARNs of all load balancers"
+  value = {
+    for key, alb in module.alb :
+    key => alb.alb_arn
+  }
+}
+
+output "target_group_arns" {
+  description = "ARNs of all target groups"
+  value = {
+    for key, alb in module.alb :
+    key => alb.target_group_arn
+  }
+}
+
 # EC2 Outputs (for_each)
-# =====================================
 output "ec2_instance_ids" {
   description = "IDs of all EC2 instances"
   value = {
@@ -97,52 +88,47 @@ output "ec2_public_dns" {
   }
 }
 
-# =====================================
 # RDS Outputs (for_each)
-# =====================================
-# output "rds_endpoints" {
-#   description = "Connection endpoints of all RDS instances"
-#   value = {
-#     for key, rds in module.rds :
-#     key => rds.db_endpoint
-#   }
-# }
+output "rds_endpoints" {
+  description = "Connection endpoints of all RDS instances"
+  value = {
+    for key, rds in module.rds :
+    key => rds.db_endpoint
+  }
+}
 
-# output "rds_addresses" {
-#   description = "Addresses of all RDS instances"
-#   value = {
-#     for key, rds in module.rds :
-#     key => rds.db_address
-#   }
-# }
+output "rds_addresses" {
+  description = "Addresses of all RDS instances"
+  value = {
+    for key, rds in module.rds :
+    key => rds.db_address
+  }
+}
 
-# output "rds_ports" {
-#   description = "Ports of all RDS instances"
-#   value = {
-#     for key, rds in module.rds :
-#     key => rds.db_port
-#   }
-# }
+output "rds_ports" {
+  description = "Ports of all RDS instances"
+  value = {
+    for key, rds in module.rds :
+    key => rds.db_port
+  }
+}
 
-# output "rds_instance_ids" {
-#   description = "Instance identifiers of all RDS databases"
-#   value = {
-#     for key, rds in module.rds :
-#     key => rds.db_instance_id
-#   }
-# }
+output "rds_instance_ids" {
+  description = "Instance identifiers of all RDS databases"
+  value = {
+    for key, rds in module.rds :
+    key => rds.db_instance_id
+  }
+}
 
-# =====================================
 # Summary Outputs
-# =====================================
-# output "deployment_summary" {
-#   description = "Summary of deployed resources"
-#   value = {
-#     vpc_id           = module.vpc.vpc_id
-#     # alb_count        = length(module.alb) # COMMENTED OUT - ALB disabled
-#     ec2_count        = length(module.ec2)
-#     rds_count        = length(module.rds)
-#     # primary_alb_dns  = try(module.alb[keys(var.alb_config)[0]].alb_dns_name, "N/A") # COMMENTED OUT - ALB disabled
-#     primary_rds_host = try(module.rds[keys(var.rds_databases)[0]].db_address, "N/A")
-#   }
-# }
+output "deployment_summary" {
+  description = "Summary of deployed resources"
+  value = {
+    vpc_id           = module.vpc.vpc_id
+    # alb_count        = length(module.alb) # COMMENTED OUT - ALB disabled
+    ec2_count        = length(module.ec2)
+    rds_count        = length(module.rds)
+    # primary_alb_dns  = try(module.alb[keys(var.alb_config)[0]].alb_dns_name, "N/A") # COMMENTED OUT - ALB disabled
+  }
+}
