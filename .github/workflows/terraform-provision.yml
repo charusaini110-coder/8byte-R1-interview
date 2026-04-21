@@ -191,7 +191,9 @@ jobs:
         id: outputs
         run: |
           terraform output -json > outputs.json
-          echo "outputs=$(cat outputs.json)" >> $GITHUB_OUTPUT
+          echo "outputs<<EOF" >> $GITHUB_OUTPUT
+          cat outputs.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Apply Summary
         run: |
