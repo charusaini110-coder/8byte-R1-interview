@@ -66,37 +66,37 @@ variable "ec2_instances" {
 }
 
 # RDS Configuration
-variable "rds_databases" {
-  description = "RDS database instances configuration"
-  type = map(object({
-    enabled          = bool
-    engine_version   = string
-    instance_class   = string
-    allocated_storage = number
-    multi_az         = bool
-    name             = string
-  }))
-  default = {
-    postgres_primary = {
-      enabled          = true
-      engine_version   = "15.4"
-      instance_class   = "db.t3.micro"
-      allocated_storage = 20
-      multi_az         = false
-      name             = "postgres-primary"
-    }
-  }
-}
+# variable "rds_databases" {
+#   description = "RDS database instances configuration"
+#   type = map(object({
+#     enabled          = bool
+#     engine_version   = string
+#     instance_class   = string
+#     allocated_storage = number
+#     multi_az         = bool
+#     name             = string
+#   }))
+#   default = {
+#     postgres_primary = {
+#       enabled          = true
+#       engine_version   = "15.4"
+#       instance_class   = "db.t3.micro"
+#       allocated_storage = 20
+#       multi_az         = false
+#       name             = "postgres-primary"
+#     }
+#   }
+# }
 
-# Database Credentials
-variable "db_username" {
-  description = "PostgreSQL administrator username"
-  type        = string
-  sensitive   = true
-}
+# # Database Credentials
+# variable "db_username" {
+#   description = "PostgreSQL administrator username"
+#   type        = string
+#   sensitive   = true
+# }
 
-variable "db_password" {
-  description = "PostgreSQL administrator password"
-  type        = string
-  sensitive   = true
-}
+# variable "db_password" {
+#   description = "PostgreSQL administrator password"
+#   type        = string
+#   sensitive   = true
+# }

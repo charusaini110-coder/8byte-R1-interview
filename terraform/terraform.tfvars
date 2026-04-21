@@ -43,15 +43,15 @@ ec2_instances = {
 
 # RDS Databases Configuration (for_each)
 # Add/remove databases by adding/removing entries
-rds_databases = {
-  postgres_primary = {
-    enabled          = true
-    engine_version   = "15.4"
-    instance_class   = "db.t3.micro"
-    allocated_storage = 20
-    multi_az         = false
-    name             = "postgres-primary"
-  }
+# rds_databases = {
+#   postgres_primary = {
+#     enabled          = true
+#     engine_version   = "15.4"
+#     instance_class   = "db.t3.micro"
+#     allocated_storage = 20
+#     multi_az         = false
+#     name             = "postgres-primary"
+#   }
   # postgres_secondary = {
   #   enabled          = true
   #   engine_version   = "15.4"
@@ -60,10 +60,10 @@ rds_databases = {
   #   multi_az         = true
   #   name             = "postgres-secondary"
   # }
-}
+//}
 
 # Database Credentials
-db_username = "admin"
-db_password = "SecurePassword123!"
+//db_username = "admin"
+//db_password = "SecurePassword123!"
 
 

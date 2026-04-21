@@ -84,33 +84,33 @@ module "ec2" {
 # =====================================
 # RDS Module (for_each)
 # =====================================
-module "rds" {
-  for_each = {
-    for key, config in var.rds_databases :
-    key => config
-    if config.enabled
-  }
+# module "rds" {
+#   for_each = {
+#     for key, config in var.rds_databases :
+#     key => config
+#     if config.enabled
+#   }
 
-  source = "./modules/rds"
+#   source = "./modules/rds"
 
-  environment            = var.environment
-  db_sg_id               = module.security_groups[0].db_sg_id
-  db_subnet_group_name   = module.vpc.database_subnet_group_name
-  db_username            = var.db_username
-  db_password            = var.db_password
-  db_allocated_storage   = each.value.allocated_storage
-  engine_version         = each.value.engine_version
-  instance_class         = each.value.instance_class
-  multi_az               = each.value.multi_az
-  tags = merge(
-    local.common_tags,
-    {
-      DBName = each.value.name
-    }
-  )
+#   environment            = var.environment
+#   db_sg_id               = module.security_groups[0].db_sg_id
+#   db_subnet_group_name   = module.vpc.database_subnet_group_name
+#   db_username            = var.db_username
+#   db_password            = var.db_password
+#   db_allocated_storage   = each.value.allocated_storage
+#   engine_version         = each.value.engine_version
+#   instance_class         = each.value.instance_class
+#   multi_az               = each.value.multi_az
+#   tags = merge(
+#     local.common_tags,
+#     {
+#       DBName = each.value.name
+#     }
+#   )
 
-  depends_on = [module.security_groups]
-}
+#   depends_on = [module.security_groups]
+# }
 
 # =====================================
 # Local Variables

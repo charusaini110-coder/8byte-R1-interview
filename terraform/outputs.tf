@@ -100,49 +100,49 @@ output "ec2_public_dns" {
 # =====================================
 # RDS Outputs (for_each)
 # =====================================
-output "rds_endpoints" {
-  description = "Connection endpoints of all RDS instances"
-  value = {
-    for key, rds in module.rds :
-    key => rds.db_endpoint
-  }
-}
+# output "rds_endpoints" {
+#   description = "Connection endpoints of all RDS instances"
+#   value = {
+#     for key, rds in module.rds :
+#     key => rds.db_endpoint
+#   }
+# }
 
-output "rds_addresses" {
-  description = "Addresses of all RDS instances"
-  value = {
-    for key, rds in module.rds :
-    key => rds.db_address
-  }
-}
+# output "rds_addresses" {
+#   description = "Addresses of all RDS instances"
+#   value = {
+#     for key, rds in module.rds :
+#     key => rds.db_address
+#   }
+# }
 
-output "rds_ports" {
-  description = "Ports of all RDS instances"
-  value = {
-    for key, rds in module.rds :
-    key => rds.db_port
-  }
-}
+# output "rds_ports" {
+#   description = "Ports of all RDS instances"
+#   value = {
+#     for key, rds in module.rds :
+#     key => rds.db_port
+#   }
+# }
 
-output "rds_instance_ids" {
-  description = "Instance identifiers of all RDS databases"
-  value = {
-    for key, rds in module.rds :
-    key => rds.db_instance_id
-  }
-}
+# output "rds_instance_ids" {
+#   description = "Instance identifiers of all RDS databases"
+#   value = {
+#     for key, rds in module.rds :
+#     key => rds.db_instance_id
+#   }
+# }
 
 # =====================================
 # Summary Outputs
 # =====================================
-output "deployment_summary" {
-  description = "Summary of deployed resources"
-  value = {
-    vpc_id           = module.vpc.vpc_id
-    # alb_count        = length(module.alb) # COMMENTED OUT - ALB disabled
-    ec2_count        = length(module.ec2)
-    rds_count        = length(module.rds)
-    # primary_alb_dns  = try(module.alb[keys(var.alb_config)[0]].alb_dns_name, "N/A") # COMMENTED OUT - ALB disabled
-    primary_rds_host = try(module.rds[keys(var.rds_databases)[0]].db_address, "N/A")
-  }
-}
+# output "deployment_summary" {
+#   description = "Summary of deployed resources"
+#   value = {
+#     vpc_id           = module.vpc.vpc_id
+#     # alb_count        = length(module.alb) # COMMENTED OUT - ALB disabled
+#     ec2_count        = length(module.ec2)
+#     rds_count        = length(module.rds)
+#     # primary_alb_dns  = try(module.alb[keys(var.alb_config)[0]].alb_dns_name, "N/A") # COMMENTED OUT - ALB disabled
+#     primary_rds_host = try(module.rds[keys(var.rds_databases)[0]].db_address, "N/A")
+#   }
+# }
