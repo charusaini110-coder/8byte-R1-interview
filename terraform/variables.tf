@@ -23,7 +23,7 @@ variable "vpc_config" {
   }
 }
 
-# Security Groups - no for_each needed (VPC level)
+# Security Groups
 variable "security_groups_enabled" {
   description = "Enable security groups creation"
   type        = bool
@@ -31,7 +31,6 @@ variable "security_groups_enabled" {
 }
 
 # ALB Configuration
-# COMMENTED OUT - ALB not currently deployed
 # variable "alb_config" {
 #   description = "Application Load Balancer configuration"
 #   type = map(object({
@@ -66,37 +65,14 @@ variable "ec2_instances" {
 }
 
 # RDS Configuration
-variable "rds_databases" {
-  description = "RDS database instances configuration"
-  type = map(object({
-    enabled          = bool
-    engine_version   = string
-    instance_class   = string
-    allocated_storage = number
-    multi_az         = bool
-    name             = string
-  }))
-  default = {
-    postgres_primary = {
-      enabled          = true
-      engine_version   = "15.4"
-      instance_class   = "db.t3.micro"
-      allocated_storage = 20
-      multi_az         = false
-      name             = "postgres-primary"
-    }
-  }
-}
-
-# Database Credentials
-variable "db_username" {
-  description = "PostgreSQL administrator username"
-  type        = string
-  sensitive   = true
-}
-
-variable "db_password" {
-  description = "PostgreSQL administrator password"
-  type        = string
-  sensitive   = true
-}
+# variable "rds_databases" {
+#   description = "RDS database instances configuration"
+#   type = map(object({
+#     enabled          = bool
+#     engine_version   = string
+#     instance_class   = string
+#     allocated_storage = number
+#     multi_az         = bool
+#     name             = string
+#   }))
+# }

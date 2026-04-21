@@ -37,7 +37,7 @@ jobs:
     needs: test-and-scan
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    # Required permissions to push to GHCR
+    
     permissions:
       contents: read
       packages: write
