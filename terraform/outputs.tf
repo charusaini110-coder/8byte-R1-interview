@@ -16,11 +16,6 @@ output "public_subnets" {
   value       = module.vpc.public_subnets
 }
 
-output "private_subnets" {
-  description = "List of private subnet IDs"
-  value       = module.vpc.private_subnets
-}
-
 # =====================================
 # Security Groups Outputs
 # =====================================
