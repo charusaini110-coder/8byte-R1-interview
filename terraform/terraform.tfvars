@@ -30,7 +30,7 @@ ec2_instances = {
   app_server_1 = {
     enabled       = true
     instance_type = "t2.micro"
-    ami_id        = "ami-0c2af51e265bd5e0e" # Ubuntu 22.04 LTS (ap-south-1)
+    ami_id        = "ami-098e39bafa7e7303d" # Ubuntu 22.04 LTS (ap-south-1)
     name          = "app-server-1"
   }
   # app_server_2 = {
